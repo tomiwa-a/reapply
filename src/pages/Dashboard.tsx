@@ -7,12 +7,24 @@ import { Dropdown } from '../components/ui/Dropdown';
 export function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCv, setSelectedCv] = useState('Master_CV_React_v2.pdf');
+  const [activeJob, setActiveJob] = useState<any>(null);
 
   const jobs = [
-    { id: 1, role: 'Senior Frontend Engineer', company: 'Vercel', status: 'Interviewing', date: 'Oct 12, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-orange-100 text-orange-700' },
-    { id: 2, role: 'Full Stack Developer', company: 'Stripe', status: 'Applied', date: 'Oct 15, 2026', cv: 'Master_CV_Fullstack.pdf', badge: 'bg-surface-300 text-ink' },
-    { id: 3, role: 'Product Engineer', company: 'Linear', status: 'Take-home', date: 'Oct 10, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-blue-100 text-blue-700' },
+    { id: 1, role: 'Senior Frontend Engineer', company: 'Vercel', status: 'Interviewing', date: 'Oct 12, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-orange-100 text-orange-700', url: 'https://vercel.com/jobs', jd: 'We are looking for a Senior Frontend Engineer...', notes: 'Referral from Sarah.' },
+    { id: 2, role: 'Full Stack Developer', company: 'Stripe', status: 'Applied', date: 'Oct 15, 2026', cv: 'Master_CV_Fullstack.pdf', badge: 'bg-surface-300 text-ink', url: 'https://stripe.com/jobs', jd: 'Stripe is looking for...', notes: '' },
+    { id: 3, role: 'Product Engineer', company: 'Linear', status: 'Take-home', date: 'Oct 10, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-blue-100 text-blue-700', url: 'https://linear.app/jobs', jd: 'Build the future of...', notes: 'Focus on UX.' },
   ];
+
+  const handleOpenNew = () => {
+    setActiveJob(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (job: any) => {
+    setActiveJob(job);
+    setSelectedCv(job.cv);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-surface-bg flex flex-col">
@@ -35,27 +47,12 @@ export function Dashboard() {
               <Filter className="w-4 h-4" />
               Filter
             </button>
-            <button onClick={() => setIsModalOpen(true)} className="btn btn-primary shrink-0">
+            <button onClick={handleOpenNew} className="btn btn-primary shrink-0">
               <Plus className="w-4 h-4" />
               New Application
             </button>
           </div>
         </header>
-
-        {/* Quick Stats Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: 'Applied', value: '45', color: 'bg-surface-200' },
-            { label: 'Interviewing', value: '4', color: 'bg-orange-50 text-orange-700 border border-orange-100' },
-            { label: 'Offers', value: '1', color: 'bg-green-50 text-green-700 border border-green-100' },
-            { label: 'Rejected', value: '18', color: 'bg-surface-100' },
-          ].map((stat, i) => (
-            <div key={i} className={`p-5 rounded-xl flex flex-col justify-between h-32 ${stat.color} ${!stat.color.includes('border') && 'border border-surface-200'}`}>
-              <span className="text-xs font-semibold uppercase tracking-wider opacity-80">{stat.label}</span>
-              <span className="text-4xl font-light tracking-tighter">{stat.value}</span>
-            </div>
-          ))}
-        </section>
 
         {/* Board Search */}
         <div className="flex items-center gap-3 mb-6">
@@ -82,7 +79,11 @@ export function Dashboard() {
           {/* List Items */}
           <div className="divide-y divide-surface-200">
             {jobs.map((job) => (
-              <div key={job.id} className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors">
+              <div 
+                key={job.id} 
+                className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer"
+                onClick={() => handleEdit(job)}
+              >
                 <div className="col-span-4 flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-white border border-surface-200 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
                     <div className="text-lg font-bold text-blood-600">
@@ -90,7 +91,7 @@ export function Dashboard() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors flex items-center gap-1 cursor-pointer">
+                    <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors flex items-center gap-1">
                       {job.role}
                     </h3>
                     <p className="text-xs text-ink-muted mt-0.5">{job.company || job.role}</p>
@@ -108,13 +109,13 @@ export function Dashboard() {
                 </div>
                 
                 <div className="col-span-3">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded cursor-pointer text-xs text-ink-muted hover:border-blood-300 hover:text-blood-600 transition-colors">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded text-xs text-ink-muted hover:border-blood-300 hover:text-blood-600 transition-colors">
                     <span className="truncate max-w-[140px]">{job.cv}</span>
                     <ArrowUpRight className="w-3 h-3 shrink-0" />
                   </div>
                 </div>
                 
-                <div className="col-span-1 text-right flex justify-end">
+                <div className="col-span-1 text-right flex justify-end" onClick={(e) => e.stopPropagation()}>
                   <Dropdown 
                     align="right"
                     trigger={
@@ -123,9 +124,8 @@ export function Dashboard() {
                       </button>
                     }
                     items={[
-                      { label: 'View Details', icon: <ExternalLink className="w-4 h-4" />, onClick: () => console.log('Details') },
+                      { label: 'View / Edit', icon: <Edit className="w-4 h-4" />, onClick: () => handleEdit(job) },
                       { label: 'Prep Interview', icon: <Handshake className="w-4 h-4" />, onClick: () => console.log('Prep') },
-                      { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => console.log('Edit') },
                       { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, danger: true, onClick: () => console.log('Delete') }
                     ]}
                   />
@@ -136,11 +136,11 @@ export function Dashboard() {
         </section>
       </main>
 
-      {/* New Application Modal */}
+      {/* Unified Application Modal */}
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="New Application"
+        title={activeJob ? `Edit Application: ${activeJob.company}` : "New Application"}
         size="xl"
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 h-[600px]">
@@ -150,22 +150,22 @@ export function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Company</label>
-                  <input type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
+                  <input defaultValue={activeJob?.company} type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Role</label>
-                  <input type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="e.g. Software Engineer" />
+                  <input defaultValue={activeJob?.role} type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="e.g. Software Engineer" />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">URL</label>
-                  <input type="url" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="https://..." />
+                  <input defaultValue={activeJob?.url} type="url" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="https://..." />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Status</label>
-                  <select className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner">
+                  <select defaultValue={activeJob?.status || "Pending"} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner">
                     <option>Pending</option>
                     <option>Applied</option>
                     <option>Interviewing</option>
@@ -190,6 +190,7 @@ export function Dashboard() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Job Description</label>
                 <textarea 
+                  defaultValue={activeJob?.jd}
                   className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner min-h-[150px] leading-relaxed" 
                   placeholder="Paste the JD here to keep it forever..."
                 />
@@ -198,6 +199,7 @@ export function Dashboard() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Personal Notes</label>
                 <textarea 
+                  defaultValue={activeJob?.notes}
                   className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner min-h-[80px]" 
                   placeholder="Any specific thoughts on this role?"
                 />
@@ -205,7 +207,7 @@ export function Dashboard() {
 
               <div className="pt-4 flex justify-end gap-3 sticky bottom-0 bg-surface-bg py-2 border-t border-surface-200">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost">Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Application</button>
+                <button type="submit" className="btn btn-primary">{activeJob ? "Update Application" : "Save Application"}</button>
               </div>
             </form>
           </div>
