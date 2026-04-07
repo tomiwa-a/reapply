@@ -1,8 +1,18 @@
-import React from 'react';
-import { Plus, Search, Filter, MoreHorizontal, ArrowUpRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Search, Filter, MoreHorizontal, ArrowUpRight, Handshake, Edit, Trash2, ExternalLink } from 'lucide-react';
 import { TopNav } from '../components/layout/TopNav';
+import { Modal } from '../components/ui/Modal';
+import { Dropdown } from '../components/ui/Dropdown';
 
 export function Dashboard() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const jobs = [
+    { id: 1, role: 'Senior Frontend Engineer', company: 'Vercel', status: 'Interviewing', date: 'Oct 12, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-orange-100 text-orange-700' },
+    { id: 2, role: 'Full Stack Developer', company: 'Stripe', status: 'Applied', date: 'Oct 15, 2026', cv: 'Master_CV_Fullstack.pdf', badge: 'bg-surface-300 text-ink' },
+    { id: 3, role: 'Product Engineer', company: 'Linear', status: 'Take-home', date: 'Oct 10, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-blue-100 text-blue-700' },
+  ];
+
   return (
     <div className="min-h-screen bg-surface-bg flex flex-col">
       <TopNav />
@@ -24,7 +34,7 @@ export function Dashboard() {
               <Filter className="w-4 h-4" />
               Filter
             </button>
-            <button className="btn btn-primary shrink-0">
+            <button onClick={() => setIsModalOpen(true)} className="btn btn-primary shrink-0">
               <Plus className="w-4 h-4" />
               New Application
             </button>
@@ -58,9 +68,9 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Board / Table Layout (Placeholder) */}
+        {/* Board / Table Layout */}
         <section className="bg-surface-100 border border-surface-200 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-surface-200 bg-surface-200/50 text-xs font-semibold text-ink-muted tracking-wider uppercase">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-surface-300 bg-surface-200 text-xs font-bold text-ink tracking-wider uppercase">
             <div className="col-span-4">Role & Company</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Applied Date</div>
@@ -70,19 +80,16 @@ export function Dashboard() {
           
           {/* List Items */}
           <div className="divide-y divide-surface-200">
-            {[
-              { role: 'Senior Frontend Engineer', company: 'Vercel', status: 'Interviewing', date: 'Oct 12, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-orange-100 text-orange-700' },
-              { role: 'Full Stack Developer', कंपनी: 'Stripe', status: 'Applied', date: 'Oct 15, 2026', cv: 'Master_CV_Fullstack.pdf', badge: 'bg-surface-300 text-ink' },
-              { role: 'Product Engineer', company: 'Linear', status: 'Take-home', date: 'Oct 10, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-blue-100 text-blue-700' },
-            ].map((job, idx) => (
-              <div key={idx} className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer">
+            {jobs.map((job) => (
+              <div key={job.id} className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors">
                 <div className="col-span-4 flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-white border border-surface-200 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-                    {/* Placeholder Logo */}
-                    <div className="text-lg font-bold text-blood-600">{job.company?.charAt(0) || job.role.charAt(0)}</div>
+                    <div className="text-lg font-bold text-blood-600">
+                      {job.company?.charAt(0) || job.role.charAt(0)}
+                    </div>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors flex items-center gap-1">
+                    <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors flex items-center gap-1 cursor-pointer">
                       {job.role}
                     </h3>
                     <p className="text-xs text-ink-muted mt-0.5">{job.company || job.role}</p>
@@ -100,23 +107,67 @@ export function Dashboard() {
                 </div>
                 
                 <div className="col-span-3">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded text-xs text-ink-muted hover:border-blood-300 hover:text-blood-600 transition-colors">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded cursor-pointer text-xs text-ink-muted hover:border-blood-300 hover:text-blood-600 transition-colors">
                     <span className="truncate max-w-[140px]">{job.cv}</span>
                     <ArrowUpRight className="w-3 h-3 shrink-0" />
                   </div>
                 </div>
                 
                 <div className="col-span-1 text-right flex justify-end">
-                  <button className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-300 rounded opacity-0 group-hover:opacity-100 transition-all">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
+                  <Dropdown 
+                    align="right"
+                    trigger={
+                      <button className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-300 rounded transition-all">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    }
+                    items={[
+                      { label: 'View Details', icon: <ExternalLink />, onClick: () => console.log('Details') },
+                      { label: 'Prep Interview', icon: <Handshake />, onClick: () => console.log('Prep') },
+                      { label: 'Edit', icon: <Edit />, onClick: () => console.log('Edit') },
+                      { label: 'Delete', icon: <Trash2 />, danger: true, onClick: () => console.log('Delete') }
+                    ]}
+                  />
                 </div>
               </div>
             ))}
           </div>
         </section>
-
       </main>
+
+      {/* New Application Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Application">
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setIsModalOpen(false); }}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Company</label>
+              <input type="text" className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400" placeholder="e.g. Acme Corp" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Role</label>
+              <input type="text" className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400" placeholder="e.g. Software Engineer" />
+            </div>
+          </div>
+          
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Job Post URL</label>
+            <input type="url" className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400" placeholder="https://..." />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Select Master CV</label>
+            <select className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400 bg-white">
+              <option>Master_CV_React_v2.pdf</option>
+              <option>Master_CV_Fullstack.pdf</option>
+            </select>
+          </div>
+
+          <div className="pt-4 flex justify-end gap-3">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost">Cancel</button>
+            <button type="submit" className="btn btn-primary">Save Application</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -1,10 +1,18 @@
 import React from 'react';
 import { Briefcase, FileText, Bot, UserCircle, Bell } from 'lucide-react';
 import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { NavLink } from 'react-router-dom';
 
 export function TopNav() {
+  const getNavClass = ({ isActive }: { isActive: boolean }) => 
+    `text-sm font-medium flex items-center gap-2 relative transition-colors ${
+      isActive 
+        ? 'text-blood-600 after:absolute after:-bottom-5 after:left-0 after:h-0.5 after:w-full after:bg-blood-600' 
+        : 'text-ink-muted hover:text-ink'
+    }`;
+
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-surface-bg border-b border-surface-200 z-50 flex items-center justify-between px-6 lg:px-12 backdrop-blur-md bg-opacity-90">
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-surface-bg border-b border-surface-200 z-40 flex items-center justify-between px-6 lg:px-12 backdrop-blur-md bg-opacity-90">
       {/* Brand */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded bg-blood-600 flex items-center justify-center text-white font-bold tracking-tighter">
@@ -17,18 +25,18 @@ export function TopNav() {
 
       {/* Center Navigation Links */}
       <div className="hidden md:flex items-center gap-8">
-        <a href="#" className="text-sm font-medium text-blood-600 flex items-center gap-2 relative after:absolute after:-bottom-5 after:left-0 after:h-0.5 after:w-full after:bg-blood-600">
+        <NavLink to="/" className={getNavClass}>
           <Briefcase className="w-4 h-4" />
           Dashboard
-        </a>
-        <a href="#" className="text-sm font-medium text-ink-muted hover:text-ink transition-colors flex items-center gap-2">
+        </NavLink>
+        <NavLink to="/cvs" className={getNavClass}>
           <FileText className="w-4 h-4" />
           Master CVs
-        </a>
-        <a href="#" className="text-sm font-medium text-ink-muted hover:text-ink transition-colors flex items-center gap-2">
+        </NavLink>
+        <NavLink to="/ai-prep" className={getNavClass}>
           <Bot className="w-4 h-4" />
           AI Prep
-        </a>
+        </NavLink>
       </div>
 
       {/* Right Controls */}
