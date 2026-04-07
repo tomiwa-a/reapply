@@ -6,6 +6,7 @@ import { Dropdown } from '../components/ui/Dropdown';
 
 export function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCv, setSelectedCv] = useState('Master_CV_React_v2.pdf');
 
   const jobs = [
     { id: 1, role: 'Senior Frontend Engineer', company: 'Vercel', status: 'Interviewing', date: 'Oct 12, 2026', cv: 'Master_CV_React_v2.pdf', badge: 'bg-orange-100 text-orange-700' },
@@ -122,10 +123,10 @@ export function Dashboard() {
                       </button>
                     }
                     items={[
-                      { label: 'View Details', icon: <ExternalLink />, onClick: () => console.log('Details') },
-                      { label: 'Prep Interview', icon: <Handshake />, onClick: () => console.log('Prep') },
-                      { label: 'Edit', icon: <Edit />, onClick: () => console.log('Edit') },
-                      { label: 'Delete', icon: <Trash2 />, danger: true, onClick: () => console.log('Delete') }
+                      { label: 'View Details', icon: <ExternalLink className="w-4 h-4" />, onClick: () => console.log('Details') },
+                      { label: 'Prep Interview', icon: <Handshake className="w-4 h-4" />, onClick: () => console.log('Prep') },
+                      { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => console.log('Edit') },
+                      { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, danger: true, onClick: () => console.log('Delete') }
                     ]}
                   />
                 </div>
@@ -136,37 +137,122 @@ export function Dashboard() {
       </main>
 
       {/* New Application Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Application">
-        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setIsModalOpen(false); }}>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Company</label>
-              <input type="text" className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400" placeholder="e.g. Acme Corp" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Role</label>
-              <input type="text" className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400" placeholder="e.g. Software Engineer" />
-            </div>
-          </div>
-          
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Job Post URL</label>
-            <input type="url" className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400" placeholder="https://..." />
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title="New Application"
+        size="xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-[600px]">
+          {/* Left Pane: Form */}
+          <div className="p-6 overflow-y-auto border-r border-surface-200 custom-scrollbar">
+            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setIsModalOpen(false); }}>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Company</label>
+                  <input type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Role</label>
+                  <input type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="e.g. Software Engineer" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">URL</label>
+                  <input type="url" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" placeholder="https://..." />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Status</label>
+                  <select className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner">
+                    <option>Pending</option>
+                    <option>Applied</option>
+                    <option>Interviewing</option>
+                    <option>Offered</option>
+                    <option>Rejected</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Master CV</label>
+                <select 
+                  value={selectedCv}
+                  onChange={(e) => setSelectedCv(e.target.value)}
+                  className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner"
+                >
+                  <option>Master_CV_React_v2.pdf</option>
+                  <option>Master_CV_Fullstack.pdf</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Job Description</label>
+                <textarea 
+                  className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner min-h-[150px] leading-relaxed" 
+                  placeholder="Paste the JD here to keep it forever..."
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Personal Notes</label>
+                <textarea 
+                  className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner min-h-[80px]" 
+                  placeholder="Any specific thoughts on this role?"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 sticky bottom-0 bg-surface-bg py-2 border-t border-surface-200">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost">Cancel</button>
+                <button type="submit" className="btn btn-primary">Save Application</button>
+              </div>
+            </form>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">Select Master CV</label>
-            <select className="w-full px-3 py-2 border border-surface-200 rounded-md text-sm focus:outline-none focus:border-blood-400 focus:ring-1 focus:ring-blood-400 bg-white">
-              <option>Master_CV_React_v2.pdf</option>
-              <option>Master_CV_Fullstack.pdf</option>
-            </select>
-          </div>
+          {/* Right Pane: Preview */}
+          <div className="bg-surface-100 p-8 flex flex-col items-center justify-center relative overflow-hidden group">
+            <div className="absolute inset-0 bg-blood-600/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            
+            <div className="w-full max-w-[340px] bg-white border border-surface-200 rounded-sm shadow-xl aspect-[1/1.414] p-8 flex flex-col gap-4 transform rotate-1 transition-transform group-hover:rotate-0 duration-500">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="h-4 w-32 bg-surface-200 rounded-full" />
+                  <div className="h-2 w-20 bg-surface-100 rounded-full" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-blood-50 border border-blood-100 flex items-center justify-center text-[10px] font-bold text-blood-600">
+                  CV
+                </div>
+              </div>
+              
+              <div className="space-y-2 mt-4">
+                <div className="h-2 w-full bg-surface-100 rounded-full" />
+                <div className="h-2 w-full bg-surface-100 rounded-full" />
+                <div className="h-2 w-3/4 bg-surface-100 rounded-full" />
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-surface-100 space-y-3">
+                <div className="h-3 w-24 bg-surface-200 rounded-full" />
+                <div className="h-2 w-full bg-surface-100 rounded-full" />
+                <div className="h-2 w-full bg-surface-100 rounded-full" />
+                <div className="h-2 w-1/2 bg-surface-100 rounded-full" />
+              </div>
 
-          <div className="pt-4 flex justify-end gap-3">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost">Cancel</button>
-            <button type="submit" className="btn btn-primary">Save Application</button>
+              <div className="mt-auto flex justify-center">
+                <span className="text-[10px] font-mono text-ink-muted tracking-tight opacity-50 uppercase">
+                  Preview: {selectedCv}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <p className="text-xs font-medium text-ink-muted">CV Preview Interface</p>
+              <p className="text-[10px] text-ink-muted/60 mt-1 uppercase tracking-widest leading-loose italic">
+                reapply contextual engine
+              </p>
+            </div>
           </div>
-        </form>
+        </div>
       </Modal>
     </div>
   );

@@ -6,9 +6,19 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+const sizeClasses = {
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-5xl',
+  '2xl': 'max-w-7xl',
+  full: 'max-w-[95vw]',
+};
+
+export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
   // Prevent scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -33,7 +43,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       
       {/* Dialog */}
       <div 
-        className="relative w-full max-w-lg bg-surface-bg rounded-xl shadow-lg border border-surface-200 overflow-hidden"
+        className={`relative w-full ${sizeClasses[size]} bg-surface-bg rounded-xl shadow-lg border border-surface-200 overflow-hidden flex flex-col max-h-[90vh]`}
         role="dialog"
         aria-modal="true"
       >
