@@ -38,12 +38,19 @@ export function MasterCVs() {
     fileInputRef.current?.click();
   };
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      console.log('File selected:', file.name);
-      // In a real app, we would handle the upload here
+    if (file && file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
     }
+  };
+
+  const handleCloseUpload = () => {
+    setIsUploadModalOpen(false);
+    setPreviewUrl(null);
   };
 
   return (
@@ -120,7 +127,7 @@ export function MasterCVs() {
       {/* Upload Modal */}
       <Modal
         isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
+        onClose={handleCloseUpload}
         title="Upload Master CV"
         size="xl"
       >
@@ -134,7 +141,7 @@ export function MasterCVs() {
                   type="file" 
                   ref={fileInputRef} 
                   className="hidden" 
-                  accept=".pdf,.docx" 
+                  accept=".pdf" 
                   onChange={handleFileChange}
                 />
                 <div 
@@ -143,7 +150,7 @@ export function MasterCVs() {
                 >
                   <UploadCloud className="w-10 h-10 text-ink-muted group-hover:text-blood-600 transition-colors mb-2" />
                   <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                  <p className="text-xs text-ink-muted mt-1">PDF, DOCX up to 10MB</p>
+                  <p className="text-xs text-ink-muted mt-1">PDF only for real-time preview</p>
                 </div>
               </div>
 
@@ -181,36 +188,39 @@ export function MasterCVs() {
             </div>
 
             <div className="pt-6 flex justify-end gap-3 border-t border-surface-200 mt-6 bg-surface-bg sticky bottom-0">
-              <button onClick={() => setIsUploadModalOpen(false)} className="btn btn-ghost">Cancel</button>
-              <button className="btn btn-primary" onClick={() => setIsUploadModalOpen(false)}>Save to Library</button>
+              <button onClick={handleCloseUpload} className="btn btn-ghost">Cancel</button>
+              <button className="btn btn-primary" onClick={handleCloseUpload}>Save to Library</button>
             </div>
           </div>
 
           {/* Right: Preview */}
-          <div className="bg-surface-100 p-8 flex flex-col items-center justify-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-blood-600/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            
-            <div className="w-full max-w-[320px] bg-white border border-surface-200 rounded-sm shadow-2xl aspect-[1/1.414] overflow-hidden relative group-hover:scale-[1.01] transition-transform duration-500">
-              <div className="absolute inset-0 p-8 flex flex-col gap-4 bg-white">
+          <div className="bg-surface-100 p-4 lg:p-8 flex items-center justify-center relative overflow-hidden h-full">
+            {previewUrl ? (
+              <div className="w-full h-full bg-white rounded shadow-2xl overflow-hidden border border-surface-200 animate-in zoom-in-95 duration-300">
+                <iframe 
+                  src={previewUrl} 
+                  className="w-full h-full border-none"
+                  title="PDF Preview"
+                />
+              </div>
+            ) : (
+              <div className="w-full max-w-[320px] bg-white border border-surface-200 rounded-sm shadow-2xl aspect-[1/1.414] overflow-hidden relative group-hover:scale-[1.01] transition-transform duration-500 p-10 flex flex-col gap-4 animate-pulse">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1.5">
-                    <div className="h-5 w-40 bg-ink rounded-sm" />
-                    <div className="h-2 w-24 bg-ink-muted/20 rounded-full" />
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-blood-600 flex items-center justify-center text-[8px] font-bold text-white tracking-tighter">
-                    PDF
+                    <div className="h-5 w-40 bg-surface-100 rounded" />
+                    <div className="h-2 w-24 bg-surface-100 rounded" />
                   </div>
                 </div>
                 <div className="mt-4 space-y-2">
-                  <div className="h-2 w-full bg-surface-200 rounded-full" />
-                  <div className="h-2 w-full bg-surface-200 rounded-full" />
-                  <div className="h-2 w-3/4 bg-surface-200 rounded-full" />
+                  {[1,2,3,4,5].map(i => (
+                    <div key={i} className="h-2 w-full bg-surface-100 rounded" />
+                  ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-surface-100 space-y-4 font-mono text-[8px] text-ink-muted/40 uppercase tracking-widest">
-                  Preview context active
+                <div className="mt-auto text-center border-t border-surface-100 pt-4">
+                   <p className="text-[10px] font-bold text-ink-muted/30 uppercase tracking-[0.2em]">Contextual Preview Engine</p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </Modal>
