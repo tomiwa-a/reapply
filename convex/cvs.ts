@@ -39,10 +39,17 @@ export const listCvs = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
-    return await ctx.db
+    const cvs = await ctx.db
       .query("cvs")
       .withIndex("by_user", (q) => q.eq("userId", identity.tokenIdentifier))
       .collect();
+
+    return await Promise.all(
+      cvs.map(async (cv) => ({
+        ...cv,
+        url: await ctx.storage.getUrl(cv.storageId),
+      }))
+    );
   },
 });
 

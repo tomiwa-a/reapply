@@ -5,6 +5,8 @@ import { Modal } from '../components/ui/Modal';
 import { Dropdown } from '../components/ui/Dropdown';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { EmptyState } from '../components/ui/EmptyState';
+import { Briefcase as BriefcaseIcon } from 'lucide-react';
 
 export function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -224,7 +226,7 @@ export function Dashboard() {
                     </div>
                   </div>
                   
-                  <div className="col-span-1 text-right flex justify-end" onClick={(e) => e.stopPropagation()}>
+                  <div className="col-span-1 text-right flex justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                     <Dropdown 
                       align="right"
                       trigger={
@@ -241,9 +243,17 @@ export function Dashboard() {
                 </div>
               ))}
               {jobs.length === 0 && (
-                <div className="p-20 text-center text-ink-muted text-sm italic">
-                  No applications yet. Click "New Application" to get started.
-                </div>
+                <EmptyState 
+                  icon={BriefcaseIcon}
+                  title="No applications yet"
+                  description="Start your journey by adding your first job application. We'll help you track every step."
+                  action={
+                    <button onClick={handleOpenNew} className="btn btn-primary">
+                      <Plus className="w-4 h-4" />
+                      Add your first job
+                    </button>
+                  }
+                />
               )}
             </div>
           )}

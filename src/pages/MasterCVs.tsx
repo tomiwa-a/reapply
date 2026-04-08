@@ -5,6 +5,8 @@ import { Modal } from '../components/ui/Modal';
 import { Dropdown } from '../components/ui/Dropdown';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { EmptyState } from '../components/ui/EmptyState';
+import { FileText as FileTextIcon, UploadCloud as UploadIcon } from 'lucide-react';
 
 export function MasterCVs() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -123,7 +125,7 @@ export function MasterCVs() {
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blood-600"></div>
           </div>
-        ) : (
+        ) : cvs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cvs.map((cv) => (
               <div key={cv._id} className="bg-white border border-surface-200 rounded-xl p-5 hover:border-blood-300 transition-colors group relative overflow-hidden">
@@ -131,23 +133,25 @@ export function MasterCVs() {
                   <div className="w-12 h-12 rounded bg-surface-100 flex items-center justify-center text-ink-muted group-hover:bg-blood-50 group-hover:text-blood-600 transition-colors cursor-pointer" onClick={() => setViewingCv(cv)}>
                     <FileText className="w-6 h-6" />
                   </div>
-                  <Dropdown 
-                    align="right"
-                    trigger={
-                      <button className="text-ink-muted hover:text-ink p-1 -mr-2 bg-surface-100/0 hover:bg-surface-100 rounded transition-all">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    }
-                    items={[
-                      { label: 'View Fullscreen', icon: <Eye className="w-4 h-4" />, onClick: () => setViewingCv(cv) },
-                      { 
-                        label: 'Download PDF', 
-                        icon: <Download className="w-4 h-4" />, 
-                        onClick: () => window.open(cv.storageId, '_blank') 
-                      },
-                      { label: 'Delete Document', icon: <Trash2 className="w-4 h-4" />, danger: true, onClick: () => handleDelete(cv._id, cv.storageId) }
-                    ]}
-                  />
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Dropdown 
+                      align="right"
+                      trigger={
+                        <button className="text-ink-muted hover:text-ink p-1 -mr-2 bg-surface-100/0 hover:bg-surface-100 rounded transition-all">
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      }
+                      items={[
+                        { label: 'View Fullscreen', icon: <Eye className="w-4 h-4" />, onClick: () => setViewingCv(cv) },
+                        { 
+                          label: 'Download PDF', 
+                          icon: <Download className="w-4 h-4" />, 
+                          onClick: () => window.open(cv.url, '_blank') 
+                        },
+                        { label: 'Delete Document', icon: <Trash2 className="w-4 h-4" />, danger: true, onClick: () => handleDelete(cv._id, cv.storageId) }
+                      ]}
+                    />
+                  </div>
                 </div>
                 
                 <h3 className="font-semibold text-sm mb-1 truncate cursor-pointer hover:text-blood-600 transition-colors" title={cv.name} onClick={() => setViewingCv(cv)}>
@@ -165,6 +169,21 @@ export function MasterCVs() {
               </div>
             ))}
           </div>
+        ) : (
+          <EmptyState 
+            icon={FileTextIcon}
+            title="Library is empty"
+            description="Upload your base resumes here to link them to your applications for better tracking."
+            action={
+              <button 
+                onClick={() => setIsUploadModalOpen(true)}
+                className="btn btn-primary"
+              >
+                <UploadIcon className="w-4 h-4" />
+                Upload your first CV
+              </button>
+            }
+          />
         )}
       </main>
 
@@ -289,9 +308,9 @@ export function MasterCVs() {
         size="lg"
       >
         <div className="flex flex-col items-center gap-6 py-4 h-[70vh]">
-          {viewingCv?.storageId ? (
+          {viewingCv?.url ? (
              <iframe 
-               src={viewingCv.storageId} 
+               src={viewingCv.url} 
                className="w-full h-full border-none shadow-2xl rounded"
                title={`CV View ${viewingCv.name}`}
              />
@@ -304,7 +323,7 @@ export function MasterCVs() {
           <div className="flex items-center gap-4 w-full justify-center shrink-0">
             <button 
               className="btn btn-outline gap-2"
-              onClick={() => window.open(viewingCv.storageId, '_blank')}
+              onClick={() => window.open(viewingCv.url, '_blank')}
             >
               <Download className="w-4 h-4" />
               Open Original
