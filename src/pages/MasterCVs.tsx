@@ -69,8 +69,12 @@ export function MasterCVs() {
       });
 
       handleCloseUpload();
-    } catch (error) {
-      console.error("Upload failed", error);
+    } catch (error: any) {
+      if (error.message?.includes("Unauthorized")) {
+        alert("Authentication Error: Please ensure you have created the 'convex' JWT template in your Clerk dashboard.");
+      } else {
+        console.error("Upload failed", error);
+      }
     } finally {
       setIsUploading(false);
     }

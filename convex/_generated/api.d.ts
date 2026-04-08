@@ -10,6 +10,7 @@
 
 import type * as cvs from "../cvs.js";
 import type * as jobs from "../jobs.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +21,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   cvs: typeof cvs;
   jobs: typeof jobs;
+  users: typeof users;
 }>;
 
 /**

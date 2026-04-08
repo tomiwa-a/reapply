@@ -1,6 +1,5 @@
-import React from 'react';
-import { Briefcase, FileText, Bot, UserCircle, Bell } from 'lucide-react';
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { Briefcase, FileText, Bot, Bell } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { NavLink } from 'react-router-dom';
 
 export function TopNav() {

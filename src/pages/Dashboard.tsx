@@ -63,23 +63,33 @@ export function Dashboard() {
 
       // Handle custom upload if needed
       if (cvSource === 'upload' && selectedFile) {
-        const postUrl = await generateUploadUrl();
-        const result = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": selectedFile.type },
-          body: selectedFile,
-        });
-        const { storageId } = await result.json();
-        finalCvStorageId = storageId;
-
-        if (saveToMaster) {
-          const newCvId = await saveCv({
-            name: selectedFile.name,
-            storageId,
-            tags: ['Uploaded from Job'],
-            size: `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`
+        try {
+          const postUrl = await generateUploadUrl();
+          const result = await fetch(postUrl, {
+            method: "POST",
+            headers: { "Content-Type": selectedFile.type },
+            body: selectedFile,
           });
-          finalCvId = newCvId;
+          const { storageId } = await result.json();
+          finalCvStorageId = storageId;
+
+          if (saveToMaster) {
+            const newCvId = await saveCv({
+              name: selectedFile.name,
+              storageId,
+              tags: ['Uploaded from Job'],
+              size: `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`
+            });
+            finalCvId = newCvId;
+          }
+        } catch (err: any) {
+          if (err.message?.includes("Unauthorized")) {
+            alert("Authentication Error: Please ensure you have created the 'convex' JWT template in your Clerk dashboard.");
+          } else {
+            console.error("Upload failed", err);
+          }
+          setIsSaving(false);
+          return;
         }
       }
 
