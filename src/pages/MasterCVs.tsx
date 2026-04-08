@@ -11,7 +11,9 @@ import { FileText as FileTextIcon, UploadCloud as UploadIcon } from 'lucide-reac
 export function MasterCVs() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewingCv, setViewingCv] = useState<any>(null);
-  const [tags, setTags] = useState<string[]>(['React', 'TypeScript']);
+  const [tags, setTags] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,8 +88,17 @@ export function MasterCVs() {
     setIsUploadModalOpen(false);
     setPreviewUrl(null);
     setSelectedFile(null);
+    setTags([]);
     setIsUploading(false);
   };
+
+  const filteredCvs = cvs?.filter(cv => {
+    const matchesSearch = cv.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTag = !selectedTag || cv.tags.includes(selectedTag);
+    return matchesSearch && matchesTag;
+  });
+
+  const allTags = Array.from(new Set(cvs?.flatMap(cv => cv.tags) || []));
 
   return (
     <div className="min-h-screen bg-surface-bg flex flex-col">
@@ -110,24 +121,55 @@ export function MasterCVs() {
           </button>
         </header>
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
-            <input 
-              type="text" 
-              placeholder="Search CVs..." 
-              className="w-full pl-9 pr-4 py-2 bg-surface-100 border border-transparent rounded-md text-sm focus:bg-white focus:border-blood-300 focus:outline-none focus:ring-2 focus:ring-blood-100 transition-all"
-            />
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
+              <input 
+                type="text" 
+                placeholder="Search CVs..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-surface-100 border border-transparent rounded-md text-sm focus:bg-white focus:border-blood-300 focus:outline-none focus:ring-2 focus:ring-blood-100 transition-all"
+              />
+            </div>
+            {selectedTag && (
+              <button 
+                onClick={() => setSelectedTag(null)}
+                className="text-xs font-medium text-blood-600 hover:text-blood-800 transition-colors flex items-center gap-1"
+              >
+                <X className="w-3 h-3" />
+                Clear filters
+              </button>
+            )}
           </div>
+          
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    selectedTag === tag 
+                      ? 'bg-blood-100 text-blood-700 border border-blood-200' 
+                      : 'bg-surface-200 text-ink-muted hover:bg-surface-300 border border-transparent'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {cvs === undefined ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blood-600"></div>
           </div>
-        ) : cvs.length > 0 ? (
+        ) : filteredCvs && filteredCvs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cvs.map((cv) => (
+            {filteredCvs.map((cv) => (
               <div key={cv._id} className="bg-white border border-surface-200 rounded-xl p-5 hover:border-blood-300 transition-colors group relative overflow-hidden">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded bg-surface-100 flex items-center justify-center text-ink-muted group-hover:bg-blood-50 group-hover:text-blood-600 transition-colors cursor-pointer" onClick={() => setViewingCv(cv)}>
@@ -161,9 +203,20 @@ export function MasterCVs() {
                 
                 <div className="flex items-center gap-2">
                   {cv.tags.map(tag => (
-                    <span key={tag} className="px-2 py-0.5 bg-surface-100 text-ink-muted rounded-full text-[10px] font-medium tracking-wide">
+                    <button 
+                      key={tag} 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTag(selectedTag === tag ? null : tag);
+                      }}
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-colors ${
+                        selectedTag === tag 
+                          ? 'bg-blood-100 text-blood-700' 
+                          : 'bg-surface-100 text-ink-muted hover:bg-surface-200'
+                      }`}
+                    >
                       {tag}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -172,16 +225,28 @@ export function MasterCVs() {
         ) : (
           <EmptyState 
             icon={FileTextIcon}
-            title="Library is empty"
-            description="Upload your base resumes here to link them to your applications for better tracking."
+            title={cvs?.length === 0 ? "Library is empty" : "No results found"}
+            description={cvs?.length === 0 
+              ? "Upload your base resumes here to link them to your applications for better tracking."
+              : `We couldn't find any CVs matching "${searchQuery}"${selectedTag ? ` with tag "${selectedTag}"` : ""}.`
+            }
             action={
-              <button 
-                onClick={() => setIsUploadModalOpen(true)}
-                className="btn btn-primary"
-              >
-                <UploadIcon className="w-4 h-4" />
-                Upload your first CV
-              </button>
+              cvs?.length === 0 ? (
+                <button 
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="btn btn-primary"
+                >
+                  <UploadIcon className="w-4 h-4" />
+                  Upload your first CV
+                </button>
+              ) : (
+                <button 
+                  onClick={() => { setSearchQuery(''); setSelectedTag(null); }}
+                  className="btn btn-outline"
+                >
+                  Clear all filters
+                </button>
+              )
             }
           />
         )}

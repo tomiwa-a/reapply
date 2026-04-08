@@ -14,6 +14,7 @@ export function Dashboard() {
   const [activeJob, setActiveJob] = useState<any>(null);
   const [cvSource, setCvSource] = useState<'master' | 'upload'>('master');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saveToMaster, setSaveToMaster] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -126,6 +127,11 @@ export function Dashboard() {
     }
   };
 
+  const filteredJobs = jobs?.filter(job => 
+    job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-surface-bg flex flex-col">
       <TopNav />
@@ -150,13 +156,12 @@ export function Dashboard() {
           </div>
         </header>
 
-        {/* Stats - static for now or can be derived from jobs */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
           {[
             { label: 'Applied', value: jobs?.length || 0, color: 'bg-surface-200' },
             { label: 'Interviewing', value: jobs?.filter(j => j.status === 'Interviewing').length || 0, color: 'bg-orange-50 text-orange-700 border border-orange-100' },
             { label: 'Offers', value: jobs?.filter(j => j.status === 'Offered').length || 0, color: 'bg-green-50 text-green-700 border border-green-100' },
-            { label: 'Rejected', value: jobs?.filter(j => j.status === 'Rejected').length || 0, color: 'bg-surface-100' },
+            { label: 'Rejected', value: jobs?.filter(j => j.status === 'Rejected').length || 0, color: 'bg-red-50 text-red-700 border border-red-100' },
           ].map((stat, i) => (
             <div key={i} className={`p-5 rounded-xl flex flex-col justify-between h-32 ${stat.color} ${!stat.color.includes('border') && 'border border-surface-200'}`}>
               <span className="text-xs font-semibold uppercase tracking-wider opacity-80">{stat.label}</span>
@@ -171,6 +176,8 @@ export function Dashboard() {
             <input 
               type="text" 
               placeholder="Search roles or companies..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-surface-100 border border-transparent rounded-md text-sm focus:bg-white focus:border-blood-300 focus:outline-none focus:ring-2 focus:ring-blood-100 transition-all"
             />
           </div>
@@ -189,73 +196,92 @@ export function Dashboard() {
             <div className="p-20 flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blood-600"></div>
             </div>
-          ) : (
+          ) : filteredJobs && filteredJobs.length > 0 ? (
             <div className="divide-y divide-surface-200">
-              {jobs.map((job) => (
-                <div key={job._id} className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer" onClick={() => handleEdit(job)}>
-                  <div className="col-span-4 flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-white border border-surface-200 flex items-center justify-center shrink-0 shadow-sm">
-                      <div className="text-lg font-bold text-blood-600">{job.company.charAt(0)}</div>
+              {filteredJobs.map((job) => {
+                const cv = cvs?.find(c => c._id === job.cvId);
+                return (
+                  <div key={job._id} className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer" onClick={() => handleEdit(job)}>
+                    <div className="col-span-4 flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-white border border-surface-200 flex items-center justify-center shrink-0 shadow-sm">
+                        <div className="text-lg font-bold text-blood-600">{job.company.charAt(0)}</div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors">{job.role}</h3>
+                        <p className="text-xs text-ink-muted mt-0.5">{job.company}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors">{job.role}</h3>
-                      <p className="text-xs text-ink-muted mt-0.5">{job.company}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="col-span-2">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                      job.status === 'Interviewing' ? 'bg-orange-100 text-orange-700' :
-                      job.status === 'Offered' ? 'bg-green-100 text-green-700' :
-                      job.status === 'Rejected' ? 'bg-red-50 text-red-700' : 'bg-surface-300 text-ink'
-                    }`}>
-                      {job.status}
-                    </span>
-                  </div>
-                  
-                  <div className="col-span-2 text-sm text-ink-muted">
-                    {new Date(job._creationTime).toLocaleDateString()}
-                  </div>
-                  
-                  <div className="col-span-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded text-xs text-ink-muted hover:border-blood-300 hover:text-blood-600 transition-colors">
-                      <span className="truncate max-w-[140px]">
-                        {cvs?.find(c => c._id === job.cvId)?.name || (job.cvStorageId ? "Custom Upload" : "No CV")}
+                    
+                    <div className="col-span-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                        job.status === 'Interviewing' ? 'bg-orange-100 text-orange-700' :
+                        job.status === 'Offered' ? 'bg-green-100 text-green-700' :
+                        job.status === 'Rejected' ? 'bg-red-50 text-red-700' : 'bg-surface-300 text-ink'
+                      }`}>
+                        {job.status}
                       </span>
-                      <ArrowUpRight className="w-3 h-3 shrink-0" />
+                    </div>
+                    
+                    <div className="col-span-2 text-sm text-ink-muted">
+                      {new Date(job._creationTime).toLocaleDateString()}
+                    </div>
+                    
+                    <div className="col-span-3">
+                      <div 
+                        onClick={(e) => {
+                          if (cv?.url) {
+                            e.stopPropagation();
+                            window.open(cv.url, '_blank');
+                          }
+                        }}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded text-xs text-ink-muted transition-colors ${cv?.url ? 'hover:border-blood-300 hover:text-blood-600' : 'opacity-50 cursor-not-allowed'}`}
+                      >
+                        <span className="truncate max-w-[140px]">
+                          {cv?.name || (job.cvStorageId ? "Custom Upload" : "No CV")}
+                        </span>
+                        <ArrowUpRight className="w-3 h-3 shrink-0" />
+                      </div>
+                    </div>
+                    
+                    <div className="col-span-1 text-right flex justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                      <Dropdown 
+                        align="right"
+                        trigger={
+                          <button className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-300 rounded transition-all">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                        }
+                        items={[
+                          { label: 'View / Edit', icon: <Edit className="w-4 h-4" />, onClick: () => handleEdit(job) },
+                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, danger: true, onClick: () => handleDelete(job._id) }
+                        ]}
+                      />
                     </div>
                   </div>
-                  
-                  <div className="col-span-1 text-right flex justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                    <Dropdown 
-                      align="right"
-                      trigger={
-                        <button className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-300 rounded transition-all">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
-                      }
-                      items={[
-                        { label: 'View / Edit', icon: <Edit className="w-4 h-4" />, onClick: () => handleEdit(job) },
-                        { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, danger: true, onClick: () => handleDelete(job._id) }
-                      ]}
-                    />
-                  </div>
-                </div>
-              ))}
-              {jobs.length === 0 && (
-                <EmptyState 
-                  icon={BriefcaseIcon}
-                  title="No applications yet"
-                  description="Start your journey by adding your first job application. We'll help you track every step."
-                  action={
-                    <button onClick={handleOpenNew} className="btn btn-primary">
-                      <Plus className="w-4 h-4" />
-                      Add your first job
-                    </button>
-                  }
-                />
-              )}
+                );
+              })}
             </div>
+          ) : (
+            <EmptyState 
+              icon={BriefcaseIcon}
+              title={jobs?.length === 0 ? "No applications yet" : "No results found"}
+              description={jobs?.length === 0 
+                ? "Start your journey by adding your first job application. We'll help you track every step."
+                : `We couldn't find any applications matching "${searchQuery}".`
+              }
+              action={
+                jobs?.length === 0 ? (
+                  <button onClick={handleOpenNew} className="btn btn-primary">
+                    <Plus className="w-4 h-4" />
+                    Add your first job
+                  </button>
+                ) : (
+                  <button onClick={() => setSearchQuery('')} className="btn btn-outline" type="button">
+                    Clear search
+                  </button>
+                )
+              }
+            />
           )}
         </section>
       </main>
