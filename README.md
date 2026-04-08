@@ -8,8 +8,6 @@
 
 **Reapply** is a premium, type-safe job application tracker built for developers. Stop losing track of which resume you sent where. Manage your career hunt with a sleek, minimalist interface and powerful backend automation.
 
-![Reapply Dashboard](./public/og-image.png)
-
 ---
 
 ## Features
@@ -37,11 +35,13 @@
 ## Getting Started
 
 ### 1. Prerequisites
+
 - Node.js (v18+)
 - A [Convex](https://convex.dev/) account
 - A [Clerk](https://clerk.com/) account
 
 ### 2. Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/tomiwa-a/reapply.git
@@ -51,13 +51,16 @@ npm install
 ```
 
 ### 3. Environment Setup
+
 Create a `.env.local` file in the root directory:
+
 ```env
 VITE_CONVEX_URL=your_convex_deployment_url
 VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 ```
 
 ### 4. Run Development Server
+
 ```bash
 # Start Convex and Vite simultaneously
 npx convex dev
