@@ -11,6 +11,7 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 
 export function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingJob, setViewingJob] = useState<any>(null);
   const [selectedCv, setSelectedCv] = useState<string>('');
   const [activeJob, setActiveJob] = useState<any>(null);
   const [cvSource, setCvSource] = useState<'master' | 'upload'>('master');
@@ -201,8 +202,8 @@ export function Dashboard() {
           </div>
         </div>
 
-        <section className="bg-white border border-surface-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-surface-300 bg-surface-200 text-xs font-bold text-ink tracking-wider uppercase">
+        <section className="bg-white border border-surface-200 rounded-xl shadow-sm">
+          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-surface-300 bg-surface-200 text-xs font-bold text-ink tracking-wider uppercase rounded-t-xl">
             <div className="col-span-4">Role & Company</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Applied Date</div>
@@ -219,7 +220,7 @@ export function Dashboard() {
               {filteredJobs.map((job) => {
                 const cv = cvs?.find(c => c._id === job.cvId);
                 return (
-                  <div key={job._id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer" onClick={() => handleEdit(job)}>
+                  <div key={job._id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer" onClick={() => setViewingJob(job)}>
                     <div className="col-span-12 md:col-span-4 flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-white border border-surface-200 flex items-center justify-center shrink-0 shadow-sm">
                         <div className="text-lg font-bold text-blood-600">{job.company.charAt(0)}</div>
@@ -262,7 +263,7 @@ export function Dashboard() {
                       </div>
                     </div>
                     
-                    <div className="col-span-3 md:col-span-1 text-right flex justify-end transition-opacity" onClick={(e) => e.stopPropagation()}>
+                    <div className="hidden md:flex col-span-3 md:col-span-1 text-right justify-end transition-opacity" onClick={(e) => e.stopPropagation()}>
                       <Dropdown 
                         align="right"
                         trigger={
@@ -338,7 +339,7 @@ export function Dashboard() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Status</label>
-                  <select name="status" defaultValue={activeJob?.status || "Pending"} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all">
+                  <select name="status" defaultValue={activeJob?.status || "Pending"} className="w-full h-10 px-3 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all appearance-none">
                     <option>Pending</option>
                     <option>Applied</option>
                     <option>Interviewing</option>
@@ -368,7 +369,7 @@ export function Dashboard() {
                         setPreviewUrl(null);
                       }
                     }} 
-                    className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all"
+                    className="w-full h-10 px-3 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all appearance-none"
                   >
                     <option value="">Select from library...</option>
                     {cvs?.map(cv => <option key={cv._id} value={cv._id}>{cv.name}</option>)}
@@ -420,6 +421,88 @@ export function Dashboard() {
                 <div className="mt-auto text-center py-4"><p className="text-[10px] uppercase tracking-widest text-ink-muted opacity-30">Waiting for local asset</p></div>
               </div>
             )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* View Modal */}
+      <Modal 
+        isOpen={!!viewingJob} 
+        onClose={() => setViewingJob(null)} 
+        title={`${viewingJob?.company} — ${viewingJob?.role}`}
+        size="xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-[650px]">
+          <div className="p-8 overflow-y-auto border-r border-surface-200 custom-scrollbar space-y-8">
+            <div className="flex flex-wrap gap-3">
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                viewingJob?.status === 'Interviewing' ? 'bg-orange-100 text-orange-700' :
+                viewingJob?.status === 'Offered' ? 'bg-green-100 text-green-700' :
+                viewingJob?.status === 'Rejected' ? 'bg-red-50 text-red-700' : 'bg-surface-200 text-ink'
+              }`}>
+                {viewingJob?.status}
+              </span>
+              <span className="px-3 py-1 bg-surface-100 rounded-full text-xs font-medium text-ink-muted">
+                Applied on {viewingJob && new Date(viewingJob._creationTime).toLocaleDateString()}
+              </span>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Job Description</h4>
+                <div className="bg-surface-100 p-4 rounded-lg text-sm leading-relaxed text-ink whitespace-pre-wrap border border-surface-200">
+                  {viewingJob?.jd || "No description provided."}
+                </div>
+              </div>
+
+              {viewingJob?.notes && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Personal Notes</h4>
+                  <div className="bg-orange-50/50 p-4 rounded-lg text-sm leading-relaxed text-ink-muted border border-orange-100/50 italic">
+                    {viewingJob.notes}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-4 pt-4 border-t border-surface-200">
+                <button 
+                  onClick={() => {
+                    handleEdit(viewingJob);
+                    setViewingJob(null);
+                  }}
+                  className="btn btn-primary px-8"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Details
+                </button>
+                {viewingJob?.url && (
+                  <button 
+                    onClick={() => window.open(viewingJob.url, '_blank')}
+                    className="btn btn-outline"
+                  >
+                    <ArrowUpRight className="w-4 h-4" />
+                    Visit Job Post
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex bg-surface-100 p-10 flex-col items-center justify-center relative overflow-hidden h-full">
+             {viewingJob && cvs?.find(c => c._id === viewingJob.cvId)?.url ? (
+               <iframe 
+                 src={cvs.find(c => c._id === viewingJob.cvId)!.url} 
+                 className="w-full h-full bg-white rounded shadow-2xl border-none" 
+                 title="CV View" 
+               />
+             ) : (
+                <div className="text-center p-12">
+                  <div className="w-16 h-16 bg-surface-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <BriefcaseIcon className="w-8 h-8 text-ink-muted/30" />
+                  </div>
+                  <p className="text-sm font-medium text-ink-muted">No CV attached to this application</p>
+                </div>
+             )}
           </div>
         </div>
       </Modal>
