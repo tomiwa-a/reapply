@@ -1,4 +1,4 @@
-# 🚀 Reapply — Your Ultimate Job Tracker
+# Reapply — Your Ultimate Job Tracker
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -8,22 +8,22 @@
 
 **Reapply** is a premium, type-safe job application tracker built for developers. Stop losing track of which resume you sent where. Manage your career hunt with a sleek, minimalist interface and powerful backend automation.
 
-![Reapply Dashboard](./public/og-image.png) *(Placeholder: You can add an actual screenshot here)*
+![Reapply Dashboard](./public/og-image.png)
 
 ---
 
-## ✨ Features
+## Features
 
-- **📊 Intelligent Dashboard**: Track every stage of your application—from Pending to Offer.
-- **📚 Master CV Library**: Store and manage multiple base resumes with real-time PDF previews.
-- **📁 Custom Uploads**: Link specific resumes to specific applications, or upload a custom-tailored version on the fly.
-- **🤖 AI Prep (Stay Tuned)**: AI-powered analysis of job descriptions to help you tailor your pitch.
-- **🔐 Secure Auth**: Seamless login experience powered by **Clerk**.
-- **🚀 Real-time Sync**: Instant data updates across devices powered by **Convex**.
+- **Intelligent Dashboard**: Track every stage of your application—from Pending to Offer.
+- **Master CV Library**: Store and manage multiple base resumes with real-time PDF previews.
+- **Custom Uploads**: Link specific resumes to specific applications, or upload a custom-tailored version on the fly.
+- **AI Prep (Stay Tuned)**: AI-powered analysis of job descriptions to help you tailor your pitch.
+- **Secure Auth**: Seamless login experience powered by **Clerk**.
+- **Real-time Sync**: Instant data updates across devices powered by **Convex**.
 
 ---
 
-## 🛠️ Technical Stack
+## Technical Stack
 
 - **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (Strictly typed)
@@ -34,7 +34,7 @@
 
 ---
 
-## 🏗️ Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - Node.js (v18+)
@@ -66,7 +66,7 @@ npm run dev
 
 ---
 
-## 🤝 Open Source & Contributions
+## Open Source & Contributions
 
 Reapply is an **Open Source** project. We welcome contributions from developers of all skill levels!
 
@@ -78,12 +78,12 @@ Reapply is an **Open Source** project. We welcome contributions from developers 
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
 <p align="center">
-  Built with ❤️ for a better job search.
+  Built with heart for a better job search.
 </p>
