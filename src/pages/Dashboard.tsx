@@ -43,7 +43,15 @@ export function Dashboard() {
     setActiveJob(job);
     setSelectedCv(job.cvId || '');
     setCvSource('master');
-    setPreviewUrl(null);
+    
+    // Find preview URL if CV exists
+    if (job.cvId) {
+      const cv = cvs?.find(c => c._id === job.cvId);
+      if (cv?.url) setPreviewUrl(cv.url);
+    } else {
+      setPreviewUrl(null);
+    }
+    
     setIsModalOpen(true);
   };
 
@@ -193,8 +201,8 @@ export function Dashboard() {
           </div>
         </div>
 
-        <section className="bg-white border border-surface-200 rounded-xl shadow-sm">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-surface-300 bg-surface-200 text-xs font-bold text-ink tracking-wider uppercase">
+        <section className="bg-white border border-surface-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-surface-300 bg-surface-200 text-xs font-bold text-ink tracking-wider uppercase">
             <div className="col-span-4">Role & Company</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Applied Date</div>
@@ -211,18 +219,18 @@ export function Dashboard() {
               {filteredJobs.map((job) => {
                 const cv = cvs?.find(c => c._id === job.cvId);
                 return (
-                  <div key={job._id} className="grid grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer" onClick={() => handleEdit(job)}>
-                    <div className="col-span-4 flex items-start gap-3">
+                  <div key={job._id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center group hover:bg-surface-200/50 transition-colors cursor-pointer" onClick={() => handleEdit(job)}>
+                    <div className="col-span-12 md:col-span-4 flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-white border border-surface-200 flex items-center justify-center shrink-0 shadow-sm">
                         <div className="text-lg font-bold text-blood-600">{job.company.charAt(0)}</div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors">{job.role}</h3>
-                        <p className="text-xs text-ink-muted mt-0.5">{job.company}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-sm group-hover:text-blood-600 transition-colors truncate">{job.role}</h3>
+                        <p className="text-xs text-ink-muted mt-0.5 truncate">{job.company}</p>
                       </div>
                     </div>
                     
-                    <div className="col-span-2">
+                    <div className="col-span-6 md:col-span-2">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
                         job.status === 'Interviewing' ? 'bg-orange-100 text-orange-700' :
                         job.status === 'Offered' ? 'bg-green-100 text-green-700' :
@@ -232,11 +240,12 @@ export function Dashboard() {
                       </span>
                     </div>
                     
-                    <div className="col-span-2 text-sm text-ink-muted">
+                    <div className="col-span-6 md:col-span-2 text-sm text-ink-muted md:text-ink">
+                      <span className="md:hidden font-bold text-ink-muted mr-1 uppercase text-[10px]">Date:</span>
                       {new Date(job._creationTime).toLocaleDateString()}
                     </div>
                     
-                    <div className="col-span-3">
+                    <div className="col-span-9 md:col-span-3">
                       <div 
                         onClick={(e) => {
                           if (cv?.url) {
@@ -246,18 +255,18 @@ export function Dashboard() {
                         }}
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-surface-200 rounded text-xs text-ink-muted transition-colors ${cv?.url ? 'hover:border-blood-300 hover:text-blood-600' : 'opacity-50 cursor-not-allowed'}`}
                       >
-                        <span className="truncate max-w-[140px]">
+                        <span className="truncate max-w-[200px] md:max-w-[140px]">
                           {cv?.name || (job.cvStorageId ? "Custom Upload" : "No CV")}
                         </span>
                         <ArrowUpRight className="w-3 h-3 shrink-0" />
                       </div>
                     </div>
                     
-                    <div className="col-span-1 text-right flex justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                    <div className="col-span-3 md:col-span-1 text-right flex justify-end transition-opacity" onClick={(e) => e.stopPropagation()}>
                       <Dropdown 
                         align="right"
                         trigger={
-                          <button className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-300 rounded transition-all">
+                          <button className="h-9 w-9 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-surface-300 rounded transition-all">
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
                         }
@@ -399,7 +408,7 @@ export function Dashboard() {
             </form>
           </div>
 
-          <div className="bg-surface-100 p-4 lg:p-10 flex items-center justify-center relative overflow-hidden h-full">
+          <div className="hidden lg:flex bg-surface-100 p-10 items-center justify-center relative overflow-hidden h-full border-l border-surface-200">
             {previewUrl ? (
               <iframe src={previewUrl} className="w-full h-full bg-white rounded shadow-2xl border-none" title="PDF Preview" />
             ) : (

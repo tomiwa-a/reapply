@@ -191,7 +191,7 @@ export function MasterCVs() {
                   <div className="w-12 h-12 rounded bg-surface-100 flex items-center justify-center text-ink-muted group-hover:bg-blood-50 group-hover:text-blood-600 transition-colors cursor-pointer" onClick={() => setViewingCv(cv)}>
                     <FileText className="w-6 h-6" />
                   </div>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="transition-opacity">
                     <Dropdown 
                       align="right"
                       trigger={
@@ -361,7 +361,7 @@ export function MasterCVs() {
           </div>
 
           {/* Right: Preview */}
-          <div className="bg-surface-100 p-4 lg:p-8 flex items-center justify-center relative overflow-hidden h-full">
+          <div className="hidden lg:flex bg-surface-100 p-8 items-center justify-center relative overflow-hidden h-full border-l border-surface-200">
             {previewUrl ? (
               <div className="w-full h-full bg-white rounded shadow-2xl overflow-hidden border border-surface-200 animate-in zoom-in-95 duration-300">
                 <iframe 
