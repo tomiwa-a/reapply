@@ -7,6 +7,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { EmptyState } from '../components/ui/EmptyState';
 import { Briefcase as BriefcaseIcon } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 
 export function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,10 +150,19 @@ export function Dashboard() {
               <Filter className="w-4 h-4" />
               Filter
             </button>
-            <button onClick={handleOpenNew} className="btn btn-primary shrink-0">
-              <Plus className="w-4 h-4" />
-              New Application
-            </button>
+            <SignedIn>
+              <button onClick={handleOpenNew} className="btn btn-primary shrink-0">
+                <Plus className="w-4 h-4" />
+                New Application
+              </button>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="btn btn-primary shrink-0">
+                  Sign In to Start
+                </button>
+              </SignInButton>
+            </SignedOut>
           </div>
         </header>
 
@@ -183,7 +193,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <section className="bg-white border border-surface-200 rounded-xl overflow-hidden shadow-sm">
+        <section className="bg-white border border-surface-200 rounded-xl shadow-sm">
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-surface-300 bg-surface-200 text-xs font-bold text-ink tracking-wider uppercase">
             <div className="col-span-4">Role & Company</div>
             <div className="col-span-2">Status</div>
@@ -271,10 +281,21 @@ export function Dashboard() {
               }
               action={
                 jobs?.length === 0 ? (
-                  <button onClick={handleOpenNew} className="btn btn-primary">
-                    <Plus className="w-4 h-4" />
-                    Add your first job
-                  </button>
+                  <>
+                    <SignedIn>
+                      <button onClick={handleOpenNew} className="btn btn-primary">
+                        <Plus className="w-4 h-4" />
+                        Add your first job
+                      </button>
+                    </SignedIn>
+                    <SignedOut>
+                      <SignInButton mode="modal">
+                        <button className="btn btn-primary">
+                          Sign in to start
+                        </button>
+                      </SignInButton>
+                    </SignedOut>
+                  </>
                 ) : (
                   <button onClick={() => setSearchQuery('')} className="btn btn-outline" type="button">
                     Clear search
@@ -293,22 +314,22 @@ export function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Company</label>
-                  <input name="company" defaultValue={activeJob?.company} required type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner" placeholder="e.g. Acme Corp" />
+                  <input name="company" defaultValue={activeJob?.company} required type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all" placeholder="e.g. Acme Corp" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Role</label>
-                  <input name="role" defaultValue={activeJob?.role} required type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner" placeholder="e.g. Software Engineer" />
+                  <input name="role" defaultValue={activeJob?.role} required type="text" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all" placeholder="e.g. Software Engineer" />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">URL</label>
-                  <input name="url" defaultValue={activeJob?.url} type="url" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner" placeholder="https://..." />
+                  <input name="url" defaultValue={activeJob?.url} type="url" className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all" placeholder="https://..." />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Status</label>
-                  <select name="status" defaultValue={activeJob?.status || "Pending"} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner">
+                  <select name="status" defaultValue={activeJob?.status || "Pending"} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all">
                     <option>Pending</option>
                     <option>Applied</option>
                     <option>Interviewing</option>
@@ -326,7 +347,20 @@ export function Dashboard() {
                 </div>
 
                 {cvSource === 'master' ? (
-                  <select value={selectedCv} onChange={(e) => setSelectedCv(e.target.value)} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner">
+                  <select 
+                    value={selectedCv} 
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedCv(id);
+                      if (id) {
+                        const cv = cvs?.find(c => c._id === id);
+                        if (cv?.url) setPreviewUrl(cv.url);
+                      } else {
+                        setPreviewUrl(null);
+                      }
+                    }} 
+                    className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all"
+                  >
                     <option value="">Select from library...</option>
                     {cvs?.map(cv => <option key={cv._id} value={cv._id}>{cv.name}</option>)}
                   </select>
@@ -347,12 +381,12 @@ export function Dashboard() {
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Job Description</label>
-                <textarea name="jd" defaultValue={activeJob?.jd} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner min-h-[120px] leading-relaxed" placeholder="Paste the JD here..." />
+                <textarea name="jd" defaultValue={activeJob?.jd} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all min-h-[120px] leading-relaxed" placeholder="Paste the JD here..." />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Personal Notes</label>
-                <textarea name="notes" defaultValue={activeJob?.notes} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all shadow-inner min-h-[80px]" placeholder="Any specific thoughts?" />
+                <textarea name="notes" defaultValue={activeJob?.notes} className="w-full px-3 py-2 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 transition-all min-h-[80px]" placeholder="Any specific thoughts?" />
               </div>
 
               <div className="pt-4 flex justify-end gap-3 sticky bottom-0 bg-surface-bg py-2 border-t border-surface-200">

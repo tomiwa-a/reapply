@@ -7,13 +7,14 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { EmptyState } from '../components/ui/EmptyState';
 import { FileText as FileTextIcon, UploadCloud as UploadIcon } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 
 export function MasterCVs() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewingCv, setViewingCv] = useState<any>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,10 +93,16 @@ export function MasterCVs() {
     setIsUploading(false);
   };
 
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
   const filteredCvs = cvs?.filter(cv => {
     const matchesSearch = cv.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = !selectedTag || cv.tags.includes(selectedTag);
-    return matchesSearch && matchesTag;
+    const matchesTags = selectedTags.length === 0 || selectedTags.every(tag => cv.tags.includes(tag));
+    return matchesSearch && matchesTags;
   });
 
   const allTags = Array.from(new Set(cvs?.flatMap(cv => cv.tags) || []));
@@ -112,13 +119,22 @@ export function MasterCVs() {
               Upload your base resumes here. When you save a new application, link it to one of these Master CVs so you know exactly which version they received.
             </p>
           </div>
-          <button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="btn btn-primary shrink-0"
-          >
-            <UploadCloud className="w-4 h-4" />
-            Upload New CV
-          </button>
+          <SignedIn>
+            <button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="btn btn-primary shrink-0"
+            >
+              <UploadCloud className="w-4 h-4" />
+              Upload New CV
+            </button>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="btn btn-primary shrink-0">
+                Sign In to Upload
+              </button>
+            </SignInButton>
+          </SignedOut>
         </header>
 
         <div className="flex flex-col gap-4 mb-8">
@@ -133,13 +149,13 @@ export function MasterCVs() {
                 className="w-full pl-9 pr-4 py-2 bg-surface-100 border border-transparent rounded-md text-sm focus:bg-white focus:border-blood-300 focus:outline-none focus:ring-2 focus:ring-blood-100 transition-all"
               />
             </div>
-            {selectedTag && (
+            {Boolean(selectedTags.length || searchQuery) && (
               <button 
-                onClick={() => setSelectedTag(null)}
+                onClick={() => { setSelectedTags([]); setSearchQuery(''); }}
                 className="text-xs font-medium text-blood-600 hover:text-blood-800 transition-colors flex items-center gap-1"
               >
                 <X className="w-3 h-3" />
-                Clear filters
+                Clear all
               </button>
             )}
           </div>
@@ -149,9 +165,9 @@ export function MasterCVs() {
               {allTags.map(tag => (
                 <button
                   key={tag}
-                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  onClick={() => toggleTag(tag)}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                    selectedTag === tag 
+                    selectedTags.includes(tag) 
                       ? 'bg-blood-100 text-blood-700 border border-blood-200' 
                       : 'bg-surface-200 text-ink-muted hover:bg-surface-300 border border-transparent'
                   }`}
@@ -207,10 +223,10 @@ export function MasterCVs() {
                       key={tag} 
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedTag(selectedTag === tag ? null : tag);
+                        toggleTag(tag);
                       }}
                       className={`px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide transition-colors ${
-                        selectedTag === tag 
+                        selectedTags.includes(tag) 
                           ? 'bg-blood-100 text-blood-700' 
                           : 'bg-surface-100 text-ink-muted hover:bg-surface-200'
                       }`}
@@ -228,20 +244,31 @@ export function MasterCVs() {
             title={cvs?.length === 0 ? "Library is empty" : "No results found"}
             description={cvs?.length === 0 
               ? "Upload your base resumes here to link them to your applications for better tracking."
-              : `We couldn't find any CVs matching "${searchQuery}"${selectedTag ? ` with tag "${selectedTag}"` : ""}.`
+              : `We couldn't find any CVs matching your active filters.`
             }
             action={
               cvs?.length === 0 ? (
-                <button 
-                  onClick={() => setIsUploadModalOpen(true)}
-                  className="btn btn-primary"
-                >
-                  <UploadIcon className="w-4 h-4" />
-                  Upload your first CV
-                </button>
+                <>
+                  <SignedIn>
+                    <button 
+                      onClick={() => setIsUploadModalOpen(true)}
+                      className="btn btn-primary"
+                    >
+                      <UploadIcon className="w-4 h-4" />
+                      Upload your first CV
+                    </button>
+                  </SignedIn>
+                  <SignedOut>
+                    <SignInButton mode="modal">
+                      <button className="btn btn-primary">
+                        Sign in to upload
+                      </button>
+                    </SignInButton>
+                  </SignedOut>
+                </>
               ) : (
                 <button 
-                  onClick={() => { setSearchQuery(''); setSelectedTag(null); }}
+                  onClick={() => { setSearchQuery(''); setSelectedTags([]); }}
                   className="btn btn-outline"
                 >
                   Clear all filters
@@ -300,7 +327,7 @@ export function MasterCVs() {
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 px-3 py-1.5 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all shadow-inner" 
+                    className="flex-1 px-3 py-1.5 bg-surface-100 border border-surface-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-blood-400 focus:ring-1 focus:ring-blood-400 transition-all" 
                     placeholder="Add tag..." 
                   />
                   <button onClick={addTag} type="button" className="p-2 bg-surface-200 hover:bg-surface-300 rounded-md transition-colors text-ink">
